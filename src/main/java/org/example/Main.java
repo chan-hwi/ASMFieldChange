@@ -11,7 +11,7 @@ public class Main {
     public static final Logger LOGGER = Logger.getGlobal();
 
     public static void main(String[] args) {
-        if (args.length < 3) {
+        if (args.length < 1) {
             System.out.println("Usage: java -jar ASMTest.jar <source classpath> <target classpath> <unit-test classpath>");
             System.exit(1);
         }
@@ -31,12 +31,10 @@ public class Main {
         String[] parsedArgs = cmd.getArgs();
 
         // Convert Windows path separators (\\) to single backslash
-        final String sourcePath = parsedArgs[0].replace("\\\\", "\\");
-        final String targetPath = parsedArgs[1].replace("\\\\", "\\");
-        final String unitTestPath = parsedArgs[2].replace("\\\\", "\\");
+        final String targetPath = parsedArgs[0].replace("\\\\", "\\");
 
         try {
-            Instrumenter instrumenter = new Instrumenter(sourcePath, targetPath, unitTestPath);
+            Instrumenter instrumenter = new Instrumenter(targetPath);
             instrumenter.instrument(timeOutputFile);
         } catch (IOException e) {
             e.printStackTrace();

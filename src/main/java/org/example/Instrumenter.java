@@ -32,7 +32,7 @@ public class Instrumenter {
         }
     }
 
-    public Instrumenter(String sourcePath, String targetPath, String testPath) throws IOException {
+    public Instrumenter(String targetPath) throws IOException {
 //        this.sourcePath = sourcePath;
         this.targetPath = targetPath;
 //        this.testPath = testPath;
