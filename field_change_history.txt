@@ -1,0 +1,14 @@
+Test.Adder@16b98e56(6)
+	numSq(2) = [25, 225]
+	num(3) = [0, 5, 15]
+	history(1) = [[0, 5, 15]]
+Test.Main(3)
+	tmp(3) = [0, 1, 2]
+Test.Adder(4)
+	opCount(4) = [0, 1, 2, 3]
+Test.Testing.Wrapper@4f3f5b24(4)
+	target(4) = [null, null, Test.Adder@16b98e56, Test.Adder@7ef20235]
+Test.Adder@7ef20235(4)
+	numSq(1) = [25]
+	num(2) = [5, -5]
+	history(1) = [[5, -5]]

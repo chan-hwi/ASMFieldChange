@@ -1,0 +1,51 @@
+plugins {
+    id "application"
+    id "com.github.johnrengelman.shadow" version "7.0.0"
+    id "java"
+}
+
+group = "org.example"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation(platform("org.junit:junit-bom:5.10.0"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    implementation("com.google.guava:guava:30.1.1-jre")
+    implementation("com.google.code.gson:gson:2.8.9")
+    implementation("com.thoughtworks.xstream:xstream:1.4.20")
+    implementation("org.ow2.asm:asm:9.5")
+    implementation("org.ow2.asm:asm-commons:9.5")
+    implementation("org.ow2.asm:asm-tree:9.5")
+    implementation("commons-cli:commons-cli:1.6.0")
+}
+
+application {
+    // Define the main class for the application.
+    mainClass = 'org.example.Main'
+}
+
+shadowJar {
+    archiveClassifier.set('')
+    dependsOn(distTar, distZip)
+    manifest {
+        attributes 'Main-Class': 'org.example.Main'
+    }
+}
+
+tasks.test {
+    useJUnitPlatform()
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java']
+        }
+        resources {
+            srcDirs = ['src/main/resources']
+        }
+    }
+}
