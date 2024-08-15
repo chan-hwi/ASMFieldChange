@@ -24,6 +24,16 @@ public class Main {
         wrapper.setTarget(adder1);
         wrapper.setTarget(adder2);
 
+        if (tmp == 1) {
+            System.out.println("tmp: 1");
+        } else {
+            System.out.println("tmp: 2");
+        }
+
+        for (int i = 0; i < 10; i++) {
+            System.out.println("i: " + i);
+        }
+
         System.out.println("End Program");
     }
 }

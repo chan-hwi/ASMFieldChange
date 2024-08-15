@@ -1,5 +1,12 @@
 package org.example.runtime;
 
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.converters.Converter;
+import com.thoughtworks.xstream.converters.MarshallingContext;
+import com.thoughtworks.xstream.converters.UnmarshallingContext;
+import com.thoughtworks.xstream.io.HierarchicalStreamReader;
+import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+
 import java.io.FileWriter;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -23,21 +30,28 @@ public class FieldChangeLogger {
 
     public static FileWriter resultFile = null;
 
-    private static final Map<String, Map<String, List<Object>>> fieldChanges = new HashMap<>();
+    private static final Map<String, Map<String, List<Map<String, Object>>>> fieldChanges = new HashMap<>();
 
-    public static void logFieldChange(Object instance, String owner, String fieldName) {
+    public static void logFieldChange(int branchId, Object instance, String owner) {
         try {
             Class<?> clazz = Class.forName(owner);
-            Field field = clazz.getDeclaredField(fieldName);
-            field.setAccessible(true);
-            Object value = field.get(instance);
-            String instanceKey = instance != null ? instance.toString() : owner;
 
+            String instanceKey = instance != null ? instance.toString() : owner;
+            String branchKey = instanceKey + "." + branchId;
+
+            Map<String, Object> fieldMap = new HashMap<>();
+
+            Field[] fields = clazz.getDeclaredFields();
+            for (Field field : fields) {
+                field.setAccessible(true);
+
+                Object value = field.get(instance);
+                fieldMap.put(field.getName(), value);
+            }
             synchronized (fieldChanges) {
-                fieldChanges.computeIfAbsent(instanceKey, k -> new HashMap<>())
-                        .computeIfAbsent(fieldName, k -> new ArrayList<>())
-                        .add(value);
-                logger.info("Field change logged: " + owner + "." + fieldName + " = " + value);
+                fieldChanges.computeIfAbsent(owner, k -> new HashMap<>())
+                        .computeIfAbsent(branchKey, k -> new ArrayList<>())
+                        .add(fieldMap);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -50,14 +64,9 @@ public class FieldChangeLogger {
             public void run() {
                 try {
                     resultFile = new FileWriter("field_change_history.txt");
-                    for (Map.Entry<String, Map<String, List<Object>>> fcEntry : fieldChanges.entrySet()) {
-                        int total = 0;
-                        for (List<Object> elem : fcEntry.getValue().values()) total += elem.size();
-                        resultFile.write(fcEntry.getKey() + "(" + total + ")" + "\n");
-                        for (Map.Entry<String, List<Object>> fchEntry : fcEntry.getValue().entrySet()) {
-                            resultFile.write("\t" + fchEntry.getKey() + "(" + fchEntry.getValue().size() + ") = " + fchEntry.getValue() + "\n");
-                        }
-                    }
+                    XStream xstream = new XStream();
+                    xstream.toXML(fieldChanges, resultFile);
+
                     resultFile.close();
                 } catch (Exception e) {
                     FileWriter fw;
