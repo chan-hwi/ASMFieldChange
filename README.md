@@ -91,10 +91,9 @@ public class Adder {
         }
 
         this.history = new ArrayList();
-        FieldChangeLogger.logFieldChange(this, "Test.Adder", "history");
         this.num = num;
-        FieldChangeLogger.logFieldChange(this, "Test.Adder", "num");
         this.history.add(num);
+        FieldChangeLogger.logFieldChange(0, this, "Test.Adder");
     }
 
     public Adder() {
@@ -103,49 +102,107 @@ public class Adder {
             FieldChangeLogger.initialize();
         }
 
+        FieldChangeLogger.logFieldChange(1, this, "Test.Adder");
     }
 
     public int getNum() {
-        return this.num;
+        int var10000 = this.num;
+        FieldChangeLogger.logFieldChange(2, this, "Test.Adder");
+        return var10000;
     }
 
     public List<Integer> getHistory() {
-        return this.history;
+        List var10000 = this.history;
+        FieldChangeLogger.logFieldChange(3, this, "Test.Adder");
+        return var10000;
     }
 
     public void add(int addend) {
         this.num += addend;
-        FieldChangeLogger.logFieldChange(this, "Test.Adder", "num");
         this.numSq = this.num * this.num;
-        FieldChangeLogger.logFieldChange(this, "Test.Adder", "numSq");
         ++opCount;
-        FieldChangeLogger.logFieldChange((Object)null, "Test.Adder", "opCount");
         this.history.add(this.num);
+        FieldChangeLogger.logFieldChange(4, this, "Test.Adder");
     }
 
     static {
-        FieldChangeLogger.logFieldChange((Object)null, "Test.Adder", "opCount");
+        FieldChangeLogger.logFieldChange(5, (Object)null, "Test.Adder");
     }
 }
 ```
 
-To get the actual field change logs, you should add compiled [FieldChangeLogger](src/main/java/org/example/runtime/FieldChangeLogger.java) to the class path when execute the instrumented target program. After executing, it generates field_change_history.txt which contains the changelog as belows.
+To get the actual field change logs, you should add compiled [FieldChangeLogger](src/main/java/org/example/runtime/FieldChangeLogger.java) and dependencies (xstream-1.4.20.jar and xmlpull-1.1.3.1.jar) to the class path when execute the instrumented target program. After executing, it generates field_change_history.txt which contains the field valuese of the class at each branch formatted by xstream.
 
-```text
-Test.Adder@16b98e56(6)
-	numSq(2) = [25, 225]
-	num(3) = [0, 5, 15]
-	history(1) = [[0, 5, 15]]
-Test.Main(3)
-	tmp(3) = [0, 1, 2]
-Test.Adder(4)
-	opCount(4) = [0, 1, 2, 3]
-Test.Testing.Wrapper@4f3f5b24(4)
-	target(4) = [null, null, Test.Adder@16b98e56, Test.Adder@7ef20235]
-Test.Adder@7ef20235(4)
-	numSq(1) = [25]
-	num(2) = [5, -5]
-	history(1) = [[5, -5]]
+```XML
+<map>
+  <entry>
+    <string>Test.Main</string>
+    <map>
+      <entry>
+        <string>Test.Main.5</string>
+        <list>
+          <map>
+            <entry>
+              <string>tmp</string>
+              <int>2</int>
+            </entry>
+          </map>
+        </list>
+      </entry>
+      <entry>
+        <string>Test.Main.6</string>
+        <list>
+          <map>
+            <entry>
+              <string>tmp</string>
+              <int>0</int>
+            </entry>
+          </map>
+        </list>
+      </entry>
+...
 ```
+The structure of the above xml is as follows.
 
-Each number wrapped in the parenthesis means the total number of changes of the fields in the instance or the number of changes of each field. The array on the right side of each field contains the changelog.
+```XML
+<map> <!-- HashMap containing field values of all classes at each branch -->
+  <entry> <!-- class -->
+    <string>{classname}</string>
+    <map> <!-- Hashmap containing field values at each branch in the class -->
+      <entry> <!-- branch -->
+        <string>{classname}.{branchId}</string>
+        <list> <!-- List containing the history of field values at the branch on each execution -->
+          <map> <!-- Hashmap containing the actual field values -->
+            <entry>
+              <string>{field 1}</string>
+              <int>{value}</int>
+            </entry>
+            <entry>
+              <string>{field 2}</string>
+              <list>
+                <int>{value 1}</int>
+                <int>{value 2}</int>
+              </list>
+            </entry>
+            ...
+          </map>
+          <map>
+            <entry>
+              <string>{field 1}</string>
+              <int>{updated value}</int>
+            </entry>
+            <entry>
+              <string>{field 2}</string>
+              <list>
+                <int>{updated value 1}</int>
+                <int>{updated value 2}</int>
+              </list>
+            </entry>
+            ...
+          </map>
+        </list>
+      </entry>
+    </map>
+  </entry>
+</map>
+```
