@@ -53,6 +53,10 @@ public class Adder {
         return num;
     }
 
+    public int getNumSq() {
+        return numSq;
+    }
+
     public List<Integer> getHistory() {
         return this.history;
     }
@@ -94,9 +98,9 @@ public class Adder {
         }
 
         this.history = new ArrayList();
-        FieldChangeLogger.logFieldChange(this, "Test.Adder", "history");
+        FieldChangeLogger.logFieldChange(this, "Test.Adder");
         this.num = num;
-        FieldChangeLogger.logFieldChange(this, "Test.Adder", "num");
+        FieldChangeLogger.logFieldChange(this, "Test.Adder");
         this.history.add(num);
     }
 
@@ -105,50 +109,45 @@ public class Adder {
         if (!FieldChangeLogger.isInitialized) {
             FieldChangeLogger.initialize();
         }
-
     }
 
     public int getNum() {
-        return this.num;
+        int var10000 = this.num;
+        FieldChangeLogger.logFieldChange(this, "Test.Adder");
+        return var10000;
+    }
+
+    public int getNumSq() {
+        int var10000 = this.numSq;
+        FieldChangeLogger.logFieldChange(this, "Test.Adder");
+        return var10000;
     }
 
     public List<Integer> getHistory() {
-        return this.history;
+        List var10000 = this.history;
+        FieldChangeLogger.logFieldChange(this, "Test.Adder");
+        return var10000;
     }
 
     public void add(int addend) {
         this.num += addend;
-        FieldChangeLogger.logFieldChange(this, "Test.Adder", "num");
         this.numSq = this.num * this.num;
-        FieldChangeLogger.logFieldChange(this, "Test.Adder", "numSq");
         ++opCount;
-        FieldChangeLogger.logFieldChange((Object) null, "Test.Adder", "opCount");
         this.history.add(this.num);
+        FieldChangeLogger.logFieldChange(this, "Test.Adder");
     }
 
     static {
-        FieldChangeLogger.logFieldChange((Object) null, "Test.Adder", "opCount");
+        FieldChangeLogger.logFieldChange((Object)null, "Test.Adder");
     }
 }
 ```
 
-To get the actual field change logs, you should add compiled [FieldChangeLogger](src/main/java/org/example/runtime/FieldChangeLogger.java) to the class path when execute the instrumented target program. After executing, it generates field_change_history.txt which contains the changelog as belows.
+To get the actual field change logs, you should add compiled [src/main/java/org/example/runtime](src/main/java/org/example/runtime) and dependencies (xstream-1.4.20.jar and xmlpull-1.1.3.1.jar) to the class path when execute the instrumented target program. After executing, it generates two files in the source root as belows.
+- `field_change_history.xml` - contains the changelog of field values in XML format.
+- `field_change_hash.xml` - contains the hashcode of the changelog of field values in XML format.
 
-```text
-Test.Adder@16b98e56(6)
-	numSq(2) = [25, 225]
-	num(3) = [0, 5, 15]
-	history(1) = [[0, 5, 15]]
-Test.Main(3)
-	tmp(3) = [0, 1, 2]
-Test.Adder(4)
-	opCount(4) = [0, 1, 2, 3]
-Test.Wrapper@4f3f5b24(4)
-	target(4) = [null, null, Test.Adder@16b98e56, Test.Adder@7ef20235]
-Test.Adder@7ef20235(4)
-	numSq(1) = [25]
-	num(2) = [5, -5]
-	history(1) = [[5, -5]]
-```
+You can see the sample of each file in [logs](logs) directory.
 
-Each number wrapped in the parenthesis means the total number of changes of the fields in the instance or the number of changes of each field. The array on the right side of each field contains the changelog.
+## How to utilize the output?
+The `field_change_history.xml` file is primarily used for debugging purposes and is not suited for Greybox analysis due to its high memory consumption. In contrast, the `field_change_hash.xml` file is more memory-efficient, as it only stores the hashes of field changelogs. By comparing these hashes, critical fields can be identified with significantly less overhead.

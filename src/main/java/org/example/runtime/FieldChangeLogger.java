@@ -55,8 +55,8 @@ public class FieldChangeLogger {
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
             public void run() {
                 try {
-                    resultFile = new FileWriter("field_change_history.txt");
-                    resultHashFile = new FileWriter("field_change_hash.txt");
+                    resultFile = new FileWriter("field_change_history.xml");
+                    resultHashFile = new FileWriter("field_change_hash.xml");
 
                     xStreamFactory.getXStream(XStreamFactory.XStreamType.HISTORY).toXML(fieldChanges, resultFile);
                     xStreamFactory.getXStream(XStreamFactory.XStreamType.HASH).toXML(fieldChangeHashes, resultHashFile);
