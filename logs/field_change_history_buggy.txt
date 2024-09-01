@@ -1,0 +1,23 @@
+<history>
+  <field id="test.Adder::num">
+    <int>0</int>
+    <int>0</int>
+    <int>5</int>
+    <int>5</int>
+    <int>5</int>
+  </field>
+  <field id="test.Adder::opCount">
+    <int>0</int>
+    <int>0</int>
+    <int>1</int>
+    <int>1</int>
+    <int>1</int>
+  </field>
+  <field id="test.Adder::numSq">
+    <int>0</int>
+    <int>0</int>
+    <int>26</int>
+    <int>26</int>
+    <int>26</int>
+  </field>
+</history>

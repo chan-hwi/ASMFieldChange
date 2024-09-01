@@ -25,9 +25,10 @@ java -jar build/libs/ASMFieldChange.jar [option] <target_class_path>
 `-t/--time-output-file <file>`: Compute and save the time to instrument each file.
 
 ## Running example
-Original Target program ([Adder.java](src/main/java/Test/Adder.java))
+Original Target program ([Adder.java](src/main/java/test/Adder.java))
+
 ```java
-package Test;
+package test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,11 +73,13 @@ java -jar build/libs/ASMFieldChange.jar <Absolute path to "build/classes/java/ma
 ```
 
 Output
+
 ```java
-package Test;
+package test;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.example.runtime.FieldChangeLogger;
 
 public class Adder {
@@ -119,12 +122,12 @@ public class Adder {
         this.numSq = this.num * this.num;
         FieldChangeLogger.logFieldChange(this, "Test.Adder", "numSq");
         ++opCount;
-        FieldChangeLogger.logFieldChange((Object)null, "Test.Adder", "opCount");
+        FieldChangeLogger.logFieldChange((Object) null, "Test.Adder", "opCount");
         this.history.add(this.num);
     }
 
     static {
-        FieldChangeLogger.logFieldChange((Object)null, "Test.Adder", "opCount");
+        FieldChangeLogger.logFieldChange((Object) null, "Test.Adder", "opCount");
     }
 }
 ```
@@ -140,7 +143,7 @@ Test.Main(3)
 	tmp(3) = [0, 1, 2]
 Test.Adder(4)
 	opCount(4) = [0, 1, 2, 3]
-Test.Testing.Wrapper@4f3f5b24(4)
+Test.Wrapper@4f3f5b24(4)
 	target(4) = [null, null, Test.Adder@16b98e56, Test.Adder@7ef20235]
 Test.Adder@7ef20235(4)
 	numSq(1) = [25]

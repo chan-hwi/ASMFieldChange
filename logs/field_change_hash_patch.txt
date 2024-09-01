@@ -1,0 +1,5 @@
+<hash>
+  <field id="test.Adder::num" hash="4965"/>
+  <field id="test.Adder::opCount" hash="993"/>
+  <field id="test.Adder::numSq" hash="24825"/>
+</hash>

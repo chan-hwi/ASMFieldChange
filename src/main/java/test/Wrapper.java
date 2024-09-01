@@ -1,4 +1,4 @@
-package Test.Testing;
+package test;
 
 public class Wrapper {
     private Object target = null;

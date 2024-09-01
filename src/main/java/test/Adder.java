@@ -1,4 +1,4 @@
-package Test;
+package test;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +12,7 @@ public class Adder {
 
     public Adder(int num) {
         this.num = num;
+        this.numSq = num * num;
         history.add(num);
     }
 
@@ -23,13 +24,17 @@ public class Adder {
         return num;
     }
 
+    public int getNumSq() {
+        return numSq;
+    }
+
     public List<Integer> getHistory() {
         return this.history;
     }
 
     public void add(int addend) {
         num += addend;
-        numSq = num * num;
+        numSq = num * num + 1;
         opCount++;
 
         history.add(num);

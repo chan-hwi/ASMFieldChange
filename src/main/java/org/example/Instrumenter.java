@@ -17,13 +17,11 @@ public class Instrumenter {
 
     private final Map<String, Double> timeMap = new HashMap<>();
 
-    //    private final String sourcePath;
+    private final String sourcePath;
     private final String targetPath;
-//    private final String testPath;
 
-    //    private final Map<String, ClassReader> sourceNodes = new HashMap<String, ClassReader>();
+    private final Map<String, ClassReader> sourceNodes = new HashMap<String, ClassReader>();
     private final Map<String, ClassReader> targetNodes = new HashMap<String, ClassReader>();
-//    private final Map<String, ClassReader> testNodes = new HashMap<String, ClassReader>();
 
     private void loadFiles(final String path, Map<String, ClassReader> nodeMap) throws IOException {
         List<String> files = Path.getAllSources(new File(path));
@@ -32,18 +30,19 @@ public class Instrumenter {
         }
     }
 
-    public Instrumenter(String targetPath) throws IOException {
-//        this.sourcePath = sourcePath;
+    public Instrumenter(String sourcePath, String targetPath) throws IOException {
+        this.sourcePath = sourcePath;
         this.targetPath = targetPath;
-//        this.testPath = testPath;
 
-//        loadFiles(sourcePath, sourceNodes);
+        loadFiles(sourcePath, sourceNodes);
         loadFiles(targetPath, targetNodes);
-//        loadFiles(testPath, testNodes);
     }
 
     public void instrument(String timeFileOutput) throws IOException {
         for (Map.Entry<String, ClassReader> entry : targetNodes.entrySet()) {
+            // Skip node when it is not present in the source node
+            if (!sourceNodes.containsKey(entry.getKey())) continue;
+
             long start = Calendar.getInstance().getTimeInMillis();
             InstrumentClassWriter cw = new InstrumentClassWriter(targetPath, ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
             FieldChangeTracker fct = new FieldChangeTracker(cw);

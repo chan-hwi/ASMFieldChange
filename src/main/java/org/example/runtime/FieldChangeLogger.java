@@ -1,12 +1,5 @@
 package org.example.runtime;
 
-import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.converters.Converter;
-import com.thoughtworks.xstream.converters.MarshallingContext;
-import com.thoughtworks.xstream.converters.UnmarshallingContext;
-import com.thoughtworks.xstream.io.HierarchicalStreamReader;
-import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
-
 import java.io.FileWriter;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -30,28 +23,27 @@ public class FieldChangeLogger {
 
     public static FileWriter resultFile = null;
 
-    private static final Map<String, Map<String, List<Map<String, Object>>>> fieldChanges = new HashMap<>();
+    public static FileWriter resultHashFile = null;
 
-    public static void logFieldChange(int branchId, Object instance, String owner) {
+    public static XStreamFactory xStreamFactory = new XStreamFactory();
+
+    private static final Map<String, List<Object>> fieldChanges = new HashMap<>();
+
+    private static final Map<String, Integer> fieldChangeHashes = new HashMap<>();
+
+    public static void logFieldChange(Object instance, String owner) {
         try {
             Class<?> clazz = Class.forName(owner);
-
-            String instanceKey = instance != null ? instance.toString() : owner;
-            String branchKey = instanceKey + "." + branchId;
-
-            Map<String, Object> fieldMap = new HashMap<>();
 
             Field[] fields = clazz.getDeclaredFields();
             for (Field field : fields) {
                 field.setAccessible(true);
+                if (!field.getType().isPrimitive()) continue;
 
-                Object value = field.get(instance);
-                fieldMap.put(field.getName(), value);
-            }
-            synchronized (fieldChanges) {
-                fieldChanges.computeIfAbsent(owner, k -> new HashMap<>())
-                        .computeIfAbsent(branchKey, k -> new ArrayList<>())
-                        .add(fieldMap);
+                final String fieldKey = owner + "::" + field.getName();
+                final Object value = field.get(instance);
+                fieldChanges.computeIfAbsent(fieldKey, k -> new ArrayList<>()).add(value);
+                fieldChangeHashes.put(fieldKey, fieldChangeHashes.computeIfAbsent(fieldKey, k -> 0) * 31 + value.hashCode());
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -64,10 +56,13 @@ public class FieldChangeLogger {
             public void run() {
                 try {
                     resultFile = new FileWriter("field_change_history.txt");
-                    XStream xstream = new XStream();
-                    xstream.toXML(fieldChanges, resultFile);
+                    resultHashFile = new FileWriter("field_change_hash.txt");
+
+                    xStreamFactory.getXStream(XStreamFactory.XStreamType.HISTORY).toXML(fieldChanges, resultFile);
+                    xStreamFactory.getXStream(XStreamFactory.XStreamType.HASH).toXML(fieldChangeHashes, resultHashFile);
 
                     resultFile.close();
+                    resultHashFile.close();
                 } catch (Exception e) {
                     FileWriter fw;
                     try {
