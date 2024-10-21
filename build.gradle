@@ -46,6 +46,7 @@ tasks.named('test') {
 
 shadowJar {
     archiveClassifier.set('')
+    dependsOn(distTar, distZip)
     manifest {
         attributes 'Main-Class': 'kr.ac.unist.apr.Main'
     }
